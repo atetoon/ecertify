@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EventStatus {
+  DRAFT
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
+  COMPLETED
+}
+
+enum RegistrationFieldType {
+  SHORT_TEXT
+  LONG_TEXT
+  EMAIL
+  NUMBER
+  PHONE
+  DATE
+  DROPDOWN
+  CHECKBOX
+  RADIO
+}
+
+enum CertificateStatus {
+  ISSUED
+  VERIFIED
+  REVOKED
+  REMOVED
+}
+
+enum TemplateFieldType {
+  NAME
+  EVENT_NAME
+  DATE
+  CERTIFICATE_ID
+  QR_CODE
+  CUSTOM
+}
+
+enum FontWeight {
+  NORMAL
+  MEDIUM
+  SEMIBOLD
+  BOLD
+}
+
+enum TextAlign {
+  LEFT
+  CENTER
+  RIGHT
+}
+
+model Organizer {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+
+  events       Event[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Event {
+  id           String      @id @default(uuid())
+  organizerId  String
+  name         String
+  slug         String      @unique
+  description  String?
+  date         DateTime
+  organization String
+  status       EventStatus @default(DRAFT)
+
+  organizer    Organizer   @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  fields       RegistrationField[]
+  participants Participant[]
+  template     Template?
+  certificates Certificate[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([organizerId])
+}
+
+model RegistrationField {
+  id          String                @id @default(uuid())
+  eventId     String
+  label       String
+  type        RegistrationFieldType
+  required    Boolean               @default(false)
+  options     Json?
+  position    Int                   @default(0)
+
+  event       Event                 @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([eventId])
+}
+
+model Participant {
+  id             String   @id @default(uuid())
+  eventId        String
+  name           String
+  email          String
+  responses      Json
+  eligible       Boolean  @default(false)
+  accessCodeHash String   @unique
+
+  event          Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  certificate    Certificate?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([eventId])
+  @@index([eventId, email])
+}
+
+model Template {
+  id             String   @id @default(uuid())
+  eventId        String   @unique
+  version        Int      @default(1)
+  fields         Json
+  backgroundKey  String?
+  backgroundType String?
+
+  event          Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Certificate {
+  id             String            @id @default(uuid())
+  certificateId  String            @unique
+  eventId        String
+  participantId  String            @unique
+  issuedAt       DateTime          @default(now())
+  verifiedAt     DateTime?
+  status         CertificateStatus @default(ISSUED)
+  pdfKey         String?
+
+  event          Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  participant    Participant       @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([eventId])
+  @@index([status])
+}

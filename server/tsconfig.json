@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    "types": ["node"],
+
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    "skipLibCheck": true,
+    "sourceMap": true,
+
+    "forceConsistentCasingInFileNames": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "moduleDetection": "force"
+  },
+  "include": ["src/**/*.ts", "src/services/certificate.ts"],
+  "exclude": ["node_modules", "dist"]
+}
