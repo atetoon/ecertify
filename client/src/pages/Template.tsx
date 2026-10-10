@@ -4221,7 +4221,7 @@ function CertificatePreview({
 
 
 
-          h-[min(76vh,calc(100vh-8rem))]
+          w-full h-auto max-h-full
 
 
 
@@ -4257,7 +4257,7 @@ function CertificatePreview({
           <img
             src={backgroundUrl}
             alt="Certificate template"
-            className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
+            className="pointer-events-none absolute inset-0 z-0 h-full w-full object-fill"
           />
         )}
 

@@ -1,16 +1,13 @@
 import express, { Router } from "express"
 
-import type {
-  AuthenticatedRequest,
-} from "../middleware/auth.js"
+import type { AuthenticatedRequest } from "../middleware/auth.js"
 
 import { prisma } from "../prisma.js"
-import { uploadObject } from "../r2.js"
+import { uploadObject, getPdf } from "../r2.js"
 
 const router = Router()
 
-const MAX_BACKGROUND_SIZE =
-  15 * 1024 * 1024
+const MAX_BACKGROUND_SIZE = 15 * 1024 * 1024
 
 const ALLOWED_TYPES = new Set([
   "application/pdf",
@@ -23,10 +20,7 @@ function getEventId(
 ): string | null {
   const value = req.params.eventId
 
-  if (
-    typeof value !== "string" ||
-    value.length === 0
-  ) {
+  if (typeof value !== "string" || value.length === 0) {
     return null
   }
 
@@ -52,60 +46,123 @@ async function getOwnedEvent(
 }
 
 /*
- * GET /api/events/:eventId/template
+ * GET /api/events/:eventId/template/background
+ *
+ * Streams the saved background from R2.
+ * The organizer must be authenticated and own the event.
  */
 router.get(
-  "/:eventId/template",
-  async (
-    req: AuthenticatedRequest,
-    res,
-  ) => {
+  "/:eventId/template/background",
+  async (req: AuthenticatedRequest, res) => {
     try {
-      const organizerId =
-        req.organizerId
+      const organizerId = req.organizerId
+      const eventId = getEventId(req)
 
       if (!organizerId) {
         res.status(401).json({
           success: false,
-          message:
-            "Authentication required",
+          message: "Authentication required",
         })
         return
       }
-
-      const eventId =
-        getEventId(req)
 
       if (!eventId) {
         res.status(400).json({
           success: false,
-          message:
-            "Invalid event ID",
+          message: "Invalid event ID",
         })
         return
       }
 
-      const event =
-        await getOwnedEvent(
-          eventId,
-          organizerId,
-        )
+      const event = await getOwnedEvent(eventId, organizerId)
 
       if (!event) {
         res.status(404).json({
           success: false,
-          message:
-            "Event not found",
+          message: "Event not found",
         })
         return
       }
 
-      const template =
-        await prisma.template.findUnique({
-          where: {
-            eventId,
-          },
+      const template = await prisma.template.findUnique({
+        where: { eventId },
+      })
+
+      if (!template?.backgroundKey || !template.backgroundType) {
+        res.status(404).json({
+          success: false,
+          message: "No saved template background found",
         })
+        return
+      }
+
+      const object = await getPdf(template.backgroundKey)
+
+      if (!object.Body) {
+        res.status(404).json({
+          success: false,
+          message: "Template background not found in storage",
+        })
+        return
+      }
+
+      const bytes = await object.Body.transformToByteArray()
+
+      res.setHeader("Content-Type", template.backgroundType)
+      res.setHeader("Cache-Control", "private, no-cache")
+      res.setHeader("X-Content-Type-Options", "nosniff")
+
+      res.send(Buffer.from(bytes))
+    } catch (error) {
+      console.error("Template background fetch error:", error)
+
+      res.status(500).json({
+        success: false,
+        message: "Unable to load template background",
+      })
+    }
+  },
+)
+
+/*
+ * GET /api/events/:eventId/template
+ */
+router.get(
+  "/:eventId/template",
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const organizerId = req.organizerId
+      const eventId = getEventId(req)
+
+      if (!organizerId) {
+        res.status(401).json({
+          success: false,
+          message: "Authentication required",
+        })
+        return
+      }
+
+      if (!eventId) {
+        res.status(400).json({
+          success: false,
+          message: "Invalid event ID",
+        })
+        return
+      }
+
+      const event = await getOwnedEvent(eventId, organizerId)
+
+      if (!event) {
+        res.status(404).json({
+          success: false,
+          message: "Event not found",
+        })
+        return
+      }
+
+      const template = await prisma.template.findUnique({
+        where: { eventId },
+      })
 
       res.json({
         success: true,
@@ -113,15 +170,11 @@ router.get(
         template,
       })
     } catch (error) {
-      console.error(
-        "Template fetch error:",
-        error,
-      )
+      console.error("Template fetch error:", error)
 
       res.status(500).json({
         success: false,
-        message:
-          "Unable to load template",
+        message: "Unable to load template",
       })
     }
   },
@@ -129,101 +182,78 @@ router.get(
 
 /*
  * PUT /api/events/:eventId/template
+ *
+ * Saves the template fields without overwriting the background.
  */
 router.put(
   "/:eventId/template",
-  express.json({
-    limit: "2mb",
-  }),
-  async (
-    req: AuthenticatedRequest,
-    res,
-  ) => {
+  express.json({ limit: "2mb" }),
+  async (req: AuthenticatedRequest, res) => {
     try {
-      const organizerId =
-        req.organizerId
+      const organizerId = req.organizerId
+      const eventId = getEventId(req)
 
       if (!organizerId) {
         res.status(401).json({
           success: false,
-          message:
-            "Authentication required",
+          message: "Authentication required",
         })
         return
       }
-
-      const eventId =
-        getEventId(req)
 
       if (!eventId) {
         res.status(400).json({
           success: false,
-          message:
-            "Invalid event ID",
+          message: "Invalid event ID",
         })
         return
       }
 
-      const event =
-        await getOwnedEvent(
-          eventId,
-          organizerId,
-        )
+      const event = await getOwnedEvent(eventId, organizerId)
 
       if (!event) {
         res.status(404).json({
           success: false,
-          message:
-            "Event not found",
+          message: "Event not found",
         })
         return
       }
 
-      const {
-        fields,
-      } = req.body as {
+      const { fields } = req.body as {
         fields?: unknown
       }
 
       if (!Array.isArray(fields)) {
         res.status(400).json({
           success: false,
-          message:
-            "Template fields must be an array",
+          message: "Template fields must be an array",
         })
         return
       }
 
-      const template =
-        await prisma.template.upsert({
-          where: {
-            eventId,
-          },
-          create: {
-            eventId,
-            version: 1,
-            fields,
-          },
-          update: {
-            fields,
-            version: 1,
-          },
-        })
+      const template = await prisma.template.upsert({
+        where: { eventId },
+        create: {
+          eventId,
+          version: 1,
+          fields,
+        },
+        update: {
+          fields,
+          version: 1,
+        },
+      })
 
       res.json({
         success: true,
         template,
       })
     } catch (error) {
-      console.error(
-        "Template save error:",
-        error,
-      )
+      console.error("Template save error:", error)
 
       res.status(500).json({
         success: false,
-        message:
-          "Unable to save template",
+        message: "Unable to save template",
       })
     }
   },
@@ -232,7 +262,7 @@ router.put(
 /*
  * POST /api/events/:eventId/template/background
  *
- * Raw PDF / PNG / JPEG upload.
+ * Uploads and persists a PDF, PNG, or JPEG background in R2.
  */
 router.post(
   "/:eventId/template/background",
@@ -244,64 +274,48 @@ router.post(
     ],
     limit: "15mb",
   }),
-  async (
-    req: AuthenticatedRequest,
-    res,
-  ) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
-      const organizerId =
-        req.organizerId
+      const organizerId = req.organizerId
+      const eventId = getEventId(req)
 
       if (!organizerId) {
         res.status(401).json({
           success: false,
-          message:
-            "Authentication required",
+          message: "Authentication required",
         })
         return
       }
-
-      const eventId =
-        getEventId(req)
 
       if (!eventId) {
         res.status(400).json({
           success: false,
-          message:
-            "Invalid event ID",
+          message: "Invalid event ID",
         })
         return
       }
 
-      const event =
-        await getOwnedEvent(
-          eventId,
-          organizerId,
-        )
+      const event = await getOwnedEvent(eventId, organizerId)
 
       if (!event) {
         res.status(404).json({
           success: false,
-          message:
-            "Event not found",
+          message: "Event not found",
         })
         return
       }
 
-      const header =
-        req.headers["content-type"]
+      const header = req.headers["content-type"]
 
       if (typeof header !== "string") {
         res.status(400).json({
           success: false,
-          message:
-            "Content type is missing",
+          message: "Content type is missing",
         })
         return
       }
 
-      const contentType =
-        header.split(";")[0]?.trim()
+      const contentType = header.split(";")[0]?.trim()
 
       if (
         typeof contentType !== "string" ||
@@ -309,8 +323,7 @@ router.post(
       ) {
         res.status(400).json({
           success: false,
-          message:
-            "Only PDF, PNG and JPEG files are supported",
+          message: "Only PDF, PNG and JPEG files are supported",
         })
         return
       }
@@ -318,83 +331,58 @@ router.post(
       if (!Buffer.isBuffer(req.body)) {
         res.status(400).json({
           success: false,
-          message:
-            "Background file is missing",
+          message: "Background file is missing",
         })
         return
       }
 
-      if (
-        req.body.length >
-        MAX_BACKGROUND_SIZE
-      ) {
+      if (req.body.length > MAX_BACKGROUND_SIZE) {
         res.status(413).json({
           success: false,
-          message:
-            "Background file is too large",
+          message: "Background file is too large",
         })
         return
       }
 
       let extension: string
 
-      if (
-        contentType ===
-        "application/pdf"
-      ) {
+      if (contentType === "application/pdf") {
         extension = "pdf"
-      } else if (
-        contentType ===
-        "image/png"
-      ) {
+      } else if (contentType === "image/png") {
         extension = "png"
       } else {
         extension = "jpg"
       }
 
-      const key =
-        `templates/${eventId}/background.${extension}`
+      const key = `templates/${eventId}/background.${extension}`
 
-      await uploadObject(
-        key,
-        req.body,
-        contentType,
-      )
+      await uploadObject(key, req.body, contentType)
 
-      const template =
-        await prisma.template.upsert({
-          where: {
-            eventId,
-          },
-          create: {
-            eventId,
-            version: 1,
-            fields: [],
-            backgroundKey: key,
-            backgroundType:
-              contentType,
-          },
-          update: {
-            backgroundKey: key,
-            backgroundType:
-              contentType,
-          },
-        })
+      const template = await prisma.template.upsert({
+        where: { eventId },
+        create: {
+          eventId,
+          version: 1,
+          fields: [],
+          backgroundKey: key,
+          backgroundType: contentType,
+        },
+        update: {
+          backgroundKey: key,
+          backgroundType: contentType,
+        },
+      })
 
       res.json({
         success: true,
         template,
       })
     } catch (error) {
-      console.error(
-        "Template background upload error:",
-        error,
-      )
+      console.error("Template background upload error:", error)
 
       res.status(500).json({
         success: false,
-        message:
-          "Unable to upload template background",
+        message: "Unable to upload template background",
       })
     }
   },

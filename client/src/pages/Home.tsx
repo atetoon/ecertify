@@ -10,11 +10,13 @@ import { useNavigate } from "react-router-dom"
 const API_URL = "http://localhost:5001"
 
 const Home = () => {
-  const [mode, setMode] = useState<"Certificate" | "Verify">("Certificate")
+  const [mode, setMode] = useState<"Certificate" | "Verify">(
+    "Certificate",
+  )
   const [certificateCode, setCertificateCode] = useState("")
-  const [status, setStatus] = useState<
-    "idle" | "error" | "success"
-  >("idle")
+  const [status, setStatus] = useState<"idle" | "error" | "success">(
+    "idle",
+  )
   const [errorMessage, setErrorMessage] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -50,9 +52,7 @@ const Home = () => {
     }
 
     if (!/^[A-Z0-9]{8}$/.test(code)) {
-      showError(
-        "Access code can only contain letters and numbers.",
-      )
+      showError("Access code can only contain letters and numbers.")
       return
     }
 
@@ -68,21 +68,13 @@ const Home = () => {
 
       if (!response.ok || !data.success) {
         if (data.code === "NOT_ISSUED") {
-          showError(
-            "Your certificate has not been issued yet.",
-          )
+          showError("Your certificate has not been issued yet.")
         } else if (data.code === "REVOKED") {
-          showError(
-            "This certificate has been revoked.",
-          )
+          showError("This certificate has been revoked.")
         } else if (data.code === "REMOVED") {
-          showError(
-            "This certificate is no longer available.",
-          )
+          showError("This certificate is no longer available.")
         } else {
-          showError(
-            data.message || "Invalid access code.",
-          )
+          showError(data.message || "Invalid access code.")
         }
 
         return
@@ -90,41 +82,29 @@ const Home = () => {
 
       setStatus("success")
 
-      /*
-       * Fetch the actual certificate PDF.
-       */
+      // Fetch the actual certificate PDF.
       const pdfResponse = await fetch(
         `${API_URL}/api/certificates/access/${code}/pdf`,
       )
 
       if (!pdfResponse.ok) {
-        const pdfData = await pdfResponse
-          .json()
-          .catch(() => null)
+        const pdfData = await pdfResponse.json().catch(() => null)
 
         throw new Error(
-          pdfData?.message ||
-            "Unable to load your certificate.",
+          pdfData?.message || "Unable to load your certificate.",
         )
       }
 
       const blob = await pdfResponse.blob()
       const pdfUrl = URL.createObjectURL(blob)
 
-      window.open(
-        pdfUrl,
-        "_blank",
-        "noopener,noreferrer",
-      )
+      window.open(pdfUrl, "_blank", "noopener,noreferrer")
 
       setTimeout(() => {
         URL.revokeObjectURL(pdfUrl)
       }, 60_000)
     } catch (error) {
-      console.error(
-        "Get certificate error:",
-        error,
-      )
+      console.error("Get certificate error:", error)
 
       showError(
         error instanceof Error
@@ -145,9 +125,7 @@ const Home = () => {
     }
 
     if (!/^[A-Z0-9]+$/.test(code)) {
-      showError(
-        "Certificate ID can only contain letters and numbers.",
-      )
+      showError("Certificate ID can only contain letters and numbers.")
       return
     }
 
@@ -169,17 +147,15 @@ const Home = () => {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-white dark:bg-zinc-950">
-
+    <main className="relative min-h-screen overflow-hidden bg-white text-zinc-950 dark:bg-zinc-950 dark:text-white">
       {/* Background */}
       <div className="absolute inset-0 z-0">
-
         {/* Light mode */}
         <div className="absolute inset-0 dark:hidden">
           <PatternWaves
             color="#111111"
             backgroundColor="#ffffff"
-            opacity={0.30}
+            opacity={0.3}
             interactive={false}
             preset="silk"
             fade="edges"
@@ -197,21 +173,41 @@ const Home = () => {
             fade="edges"
           />
         </div>
-
       </div>
 
-      {/* Theme switcher */}
-      <div className="absolute right-6 top-6 z-20">
+      {/* Floating Navigation Bar */}
+      <header className="absolute left-1/2 top-4 z-40 w-[calc(100%-2rem)] max-w-5xl -translate-x-1/2">
+        <nav className="flex h-14 items-center justify-between rounded-full border border-zinc-200/80 bg-white/80 px-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/70 sm:px-7">
+          {/* Brand */}
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="shrink-0 font-['Quicksand'] text-lg font-bold tracking-tight text-zinc-950 transition-opacity hover:opacity-70 dark:text-white"
+          >
+            eCERTIFY
+          </button>
+
+          {/* Organizer Login */}
+          <button
+            type="button"
+            onClick={() => navigate("/login")}
+            className="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-black px-3 text-[9px] font-extrabold tracking-wide text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 sm:gap-2 sm:px-5 sm:text-[10px]"          >
+            ORGANIZER LOGIN
+            <span className="text-xs">→</span>
+          </button>
+        </nav>
+      </header>
+
+      {/* Theme Switcher — original position and behavior preserved */}
+      <div className="absolute right-6 top-6 z-50">
         <ThemeSwitcher />
       </div>
 
-      {/* Main content */}
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-6">
-
+      {/* Main Content */}
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-6 pb-10 pt-24">
         <div className="w-full max-w-md text-center">
-
-          {/* Logo */}
-          <h1 className="font-['Quicksand'] text-4xl font-bold tracking-tight">
+          {/* Heading */}
+          <h1 className="font-['Quicksand'] text-4xl font-bold tracking-tight sm:text-5xl">
             eCERTIFY
           </h1>
 
@@ -219,15 +215,13 @@ const Home = () => {
             Digital certificates for events
           </p>
 
-          {/* Mode switch */}
+          {/* Mode Switch */}
           <div className="mt-10 flex justify-center">
             <RubberSegment
               items={["Certificate", "Verify"]}
               value={mode}
               onChange={(value) => {
-                setMode(
-                  value as "Certificate" | "Verify",
-                )
+                setMode(value as "Certificate" | "Verify")
                 setCertificateCode("")
                 setLoading(false)
                 clearError()
@@ -249,7 +243,7 @@ const Home = () => {
             />
           </div>
 
-          {/* Certificate access code */}
+          {/* Certificate Access Code */}
           {mode === "Certificate" ? (
             <div className="mt-10 flex justify-center">
               <CodeSlots
@@ -258,6 +252,7 @@ const Home = () => {
                 status={status}
                 onChange={(code) => {
                   setCertificateCode(code)
+
                   if (status === "error") {
                     clearError()
                   }
@@ -284,7 +279,6 @@ const Home = () => {
               />
             </div>
           ) : (
-
             /* Certificate ID */
             <div className="mt-10">
               <Input
@@ -312,16 +306,16 @@ const Home = () => {
             </div>
           )}
 
-          {/* Error message */}
+          {/* Error Message */}
           <div className="mt-3 min-h-5">
             {status === "error" && (
-              <p className="text-sm text-red-500">
+              <p role="alert" className="text-sm text-red-500">
                 {errorMessage}
               </p>
             )}
           </div>
 
-          {/* Action button */}
+          {/* Action Button */}
           <Button
             className="mt-3 w-full"
             onClick={handleAction}
@@ -333,18 +327,6 @@ const Home = () => {
                 ? "Get Certificate"
                 : "Verify Certificate"}
           </Button>
-
-          {/* Organizer login */}
-          <div className="mt-8">
-            <button
-              type="button"
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-              onClick={() => navigate("/login")}
-            >
-              Organizer Login →
-            </button>
-          </div>
-
         </div>
       </div>
     </main>

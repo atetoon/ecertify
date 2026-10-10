@@ -397,32 +397,40 @@ export default function Register() {
 
           {/* Compact Event Info */}
           <div className="mx-auto w-full max-w-2xl min-w-0 px-5 sm:px-8">
-            <div className="w-full min-w-0 rounded-xl border border-white/50 bg-white/35 px-4 py-4 shadow-lg backdrop-blur-md sm:px-6">
-              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
-                  <span className="max-w-full break-words font-['Quicksand'] text-base font-semibold text-zinc-900">
+            <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-black/15 bg-white/90 shadow-sm">
+              <div className="flex min-w-0 flex-col sm:flex-row">
+                {/* Event details */}
+                <div className="min-w-0 flex-1 px-5 py-5 sm:px-6">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                    Event details
+                  </p>
+
+                  <h2 className="mt-2 break-words font-['Quicksand'] text-lg font-semibold leading-snug tracking-tight text-black">
                     {event.name}
-                  </span>
+                  </h2>
 
-                  <span className="hidden text-zinc-400 sm:inline">
-                    •
-                  </span>
-
-                  <span className="max-w-full break-words text-sm text-zinc-600">
+                  <p className="mt-1 break-words text-sm leading-5 text-zinc-600">
                     {event.organization}
-                  </span>
+                  </p>
+
+                  {event.description && (
+                    <p className="mt-3 break-words text-xs leading-5 text-zinc-500">
+                      {event.description}
+                    </p>
+                  )}
                 </div>
 
-                <div className="shrink-0 text-sm text-zinc-600">
-                  {formattedDate}
+                {/* Date */}
+                <div className="flex shrink-0 items-center gap-3 border-t border-black/10 bg-zinc-100/80 px-5 py-4 sm:w-40 sm:flex-col sm:items-start sm:justify-center sm:border-l sm:border-t-0 sm:px-5">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                    Date
+                  </span>
+
+                  <span className="text-sm font-semibold tabular-nums text-black">
+                    {formattedDate}
+                  </span>
                 </div>
               </div>
-
-              {event.description && (
-                <p className="mt-2 break-words text-xs leading-5 text-zinc-500">
-                  {event.description}
-                </p>
-              )}
             </div>
           </div>
 
