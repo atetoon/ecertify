@@ -1,5 +1,3 @@
-import path from "node:path"
-
 import puppeteer from "puppeteer"
 
 import QRCode from "qrcode"
@@ -464,14 +462,6 @@ async function renderHtmlToPdf(
 ): Promise<Buffer> {
   const browser = await puppeteer.launch({
     headless: true,
-    executablePath: path.join(
-      process.env.PUPPETEER_CACHE_DIR ??
-        path.join(process.env.HOME ?? "/opt/render", ".cache", "puppeteer"),
-      "chrome",
-      "linux-154.0.8037.57",
-      "chrome-linux64",
-      "chrome",
-    ),
   })
 
   try {
