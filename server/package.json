@@ -1,3 +1,4 @@
+
 {
   "name": "server",
   "version": "1.0.0",
@@ -8,6 +9,8 @@
     "start": "tsx src/server.ts",
     "generate": "prisma generate",
     "migrate": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "build": "prisma generate",
     "studio": "prisma studio"
   },
   "dependencies": {
