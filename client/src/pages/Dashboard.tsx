@@ -87,6 +87,24 @@ const Dashboard = () => {
   revokedCertificates: 0,
 })
 
+const [organizerName, setOrganizerName] = useState("Organizer")
+
+useEffect(() => {
+  try {
+    const storedOrganizer = localStorage.getItem("ecertify_organizer")
+
+    if (storedOrganizer) {
+      const organizer = JSON.parse(storedOrganizer)
+
+      if (typeof organizer.name === "string" && organizer.name.trim()) {
+        setOrganizerName(organizer.name.trim())
+      }
+    }
+  } catch (error) {
+    console.error("Unable to read organizer details:", error)
+  }
+}, [])
+
 const [recentActivity, setRecentActivity] = useState<
   {
     type: string
@@ -993,7 +1011,7 @@ const [recentActivity, setRecentActivity] = useState<
 
             <span className="hidden text-sm font-medium sm:block">
 
-              Dhruv
+              {organizerName}
 
             </span>
 
@@ -1119,7 +1137,12 @@ const [recentActivity, setRecentActivity] = useState<
 
             >
 
-              Good Morning, Dhruv.
+              {new Date().getHours() < 12
+                ? "Good morning"
+                : new Date().getHours() < 17
+                  ? "Good afternoon"
+                  : "Good evening"}
+              , {organizerName}.
 
             </h1>
 
