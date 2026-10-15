@@ -3,7 +3,7 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 
-import { comparePassword, createToken, hashPassword } from "./auth.js";
+import { comparePassword, createToken } from "./auth.js";
 import { requireAuth } from "./middleware/auth.js";
 import { prisma } from "./prisma.js";
 
@@ -20,11 +20,13 @@ const app = express();
 
 const port = Number(process.env.PORT ?? 5001);
 
-const allowedOrigins = new Set([
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-  process.env.CLIENT_URL,
-].filter((origin): origin is string => Boolean(origin)));
+const allowedOrigins = new Set(
+  [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    process.env.CLIENT_URL,
+  ].filter((origin): origin is string => Boolean(origin)),
+);
 
 app.use(
   cors({
@@ -78,84 +80,8 @@ app.use("/api/certificates/access", publicAccessRouter);
 
 /*
  * Organizer authentication
+ * Public organizer registration is intentionally disabled.
  */
-app.post("/api/auth/register", async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
-
-    if (
-      typeof name !== "string" ||
-      typeof email !== "string" ||
-      typeof password !== "string"
-    ) {
-      res.status(400).json({
-        success: false,
-        message: "Name, email and password are required",
-      });
-      return;
-    }
-
-    const normalizedEmail = email.trim().toLowerCase();
-
-    if (!normalizedEmail) {
-      res.status(400).json({
-        success: false,
-        message: "Email is required",
-      });
-      return;
-    }
-
-    if (password.length < 8) {
-      res.status(400).json({
-        success: false,
-        message: "Password must be at least 8 characters",
-      });
-      return;
-    }
-
-    const existingOrganizer = await prisma.organizer.findUnique({
-      where: { email: normalizedEmail },
-    });
-
-    if (existingOrganizer) {
-      res.status(409).json({
-        success: false,
-        message: "An organizer with this email already exists",
-      });
-      return;
-    }
-
-    const passwordHash = await hashPassword(password);
-
-    const organizer = await prisma.organizer.create({
-      data: {
-        name: name.trim(),
-        email: normalizedEmail,
-        passwordHash,
-      },
-    });
-
-    const token = createToken(organizer.id);
-
-    res.status(201).json({
-      success: true,
-      token,
-      organizer: {
-        id: organizer.id,
-        name: organizer.name,
-        email: organizer.email,
-      },
-    });
-  } catch (error) {
-    console.error("Organizer registration error:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Unable to create organizer",
-    });
-  }
-});
-
 app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
