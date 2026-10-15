@@ -458,114 +458,48 @@ function renderFields(
 
 
 async function renderHtmlToPdf(
-
   html: string,
-
 ): Promise<Buffer> {
-
-  const browser =
-
-    await puppeteer.launch({
-
-      headless: true,
-
-    })
-
-
+  const browser = await puppeteer.launch({
+    headless: true,
+  })
 
   try {
+    const page = await browser.newPage()
 
-    const page =
-
-      await browser.newPage()
-
-
-
+    // A4 landscape at 96 DPI ≈ 1123 × 794 CSS pixels.
     await page.setViewport({
-
-      width: 1120,
-
-      height: 790,
-
+      width: 1123,
+      height: 794,
       deviceScaleFactor: 1,
-
     })
 
+    await page.setContent(html, {
+      waitUntil: "load",
+    })
 
-
-    await page.setContent(
-
-      
-
-      html,
-
-      {
-
-        waitUntil: "load",
-
-      },
-
-    )
-
-    
-    
-await page.evaluate(async () => {
-  await document.fonts.ready;
-});
-
-const fontInfo = await page.evaluate(() =>
-  [...document.querySelectorAll(".certificate-field")].map((el) => {
-    const style = getComputedStyle(el);
-
-    return {
-      text: el.textContent?.trim(),
-      inlineStyle: (el as HTMLElement).getAttribute("style"),
-      fontSize: style.fontSize,
-      fontFamily: style.fontFamily,
-    };
-  }),
-);
-
-console.log("PDF RENDERED FONTS:", fontInfo);
-
-
+    await page.evaluate(async () => {
+      await document.fonts.ready
+    })
 
     return Buffer.from(
-
       await page.pdf({
-
-        width: "1120px",
-
-        height: "790px",
-
+        format: "A4",
+        landscape: true,
         printBackground: true,
-
         pageRanges: "1",
-
         preferCSSPageSize: false,
-
         margin: {
-
           top: 0,
-
           right: 0,
-
           bottom: 0,
-
           left: 0,
-
         },
-
       }),
-
     )
-
   } finally {
-
     await browser.close()
-
   }
-
 }
 
 
@@ -620,21 +554,13 @@ async function createDynamicPdf(
 
 
     html,
-
     body {
-
       margin: 0;
-
       padding: 0;
-
-      width: 1120px;
-
-      height: 790px;
-
+      width: 297mm;
+      height: 210mm;
       background: transparent;
-
       overflow: hidden;
-
     }
 
 
@@ -729,19 +655,12 @@ async function createImageBackgroundPdf(
 
 
 html,
-
 body {
-
   margin: 0;
-
   padding: 0;
-
-  width: 1120px;
-
-  height: 790px;
-
+  width: 297mm;
+  height: 210mm;
   overflow: hidden;
-
 }
 
 
