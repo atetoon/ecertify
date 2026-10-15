@@ -10,7 +10,7 @@
     "generate": "prisma generate",
     "migrate": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
-    "build": "prisma generate",
+    "build": "prisma generate && puppeteer browsers install chrome",
     "studio": "prisma studio",
     "organizer:create": "tsx scripts/create-organizer.ts"
   },
