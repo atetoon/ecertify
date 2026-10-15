@@ -1,3 +1,5 @@
+import path from "node:path"
+
 import puppeteer from "puppeteer"
 
 import QRCode from "qrcode"
@@ -462,12 +464,19 @@ async function renderHtmlToPdf(
 ): Promise<Buffer> {
   const browser = await puppeteer.launch({
     headless: true,
+    executablePath: path.join(
+      process.env.PUPPETEER_CACHE_DIR ??
+        path.join(process.env.HOME ?? "/opt/render", ".cache", "puppeteer"),
+      "chrome",
+      "linux-154.0.8037.57",
+      "chrome-linux64",
+      "chrome",
+    ),
   })
 
   try {
     const page = await browser.newPage()
 
-    // A4 landscape at 96 DPI ≈ 1123 × 794 CSS pixels.
     await page.setViewport({
       width: 1123,
       height: 794,
@@ -501,7 +510,6 @@ async function renderHtmlToPdf(
     await browser.close()
   }
 }
-
 
 
 async function createDynamicPdf(
