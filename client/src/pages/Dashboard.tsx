@@ -90,18 +90,33 @@ const Dashboard = () => {
 const [organizerName, setOrganizerName] = useState("Organizer")
 
 useEffect(() => {
-  try {
-    const storedOrganizer = localStorage.getItem("ecertify_organizer")
+  const loadOrganizer = () => {
+    try {
+      const storedOrganizer = localStorage.getItem("ecertify_organizer")
 
-    if (storedOrganizer) {
+      if (!storedOrganizer) {
+        setOrganizerName("Organizer")
+        return
+      }
+
       const organizer = JSON.parse(storedOrganizer)
 
-      if (typeof organizer.name === "string" && organizer.name.trim()) {
-        setOrganizerName(organizer.name.trim())
-      }
+      setOrganizerName(
+        typeof organizer.name === "string" && organizer.name.trim()
+          ? organizer.name.trim()
+          : "Organizer",
+      )
+    } catch (error) {
+      console.error("Unable to read organizer details:", error)
+      setOrganizerName("Organizer")
     }
-  } catch (error) {
-    console.error("Unable to read organizer details:", error)
+  }
+
+  loadOrganizer()
+  window.addEventListener("storage", loadOrganizer)
+
+  return () => {
+    window.removeEventListener("storage", loadOrganizer)
   }
 }, [])
 
