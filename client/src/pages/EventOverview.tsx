@@ -196,7 +196,7 @@ export default function EventOverview() {
   }, [eventId])
 
   const registrationLink = event
-    ? `ecertify.com/register/${event.registrationSlug}`
+    ? `ecertify.tech/register/${event.registrationSlug}`
     : ""
 
   const handleCopy = async () => {
