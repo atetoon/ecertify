@@ -35,7 +35,7 @@ interface VerificationResponse {
   certificate?: Certificate
 }
 
-const API_URL = "http://localhost:5001"
+const API_URL = import.meta.env.VITE_API_URL
 
 const formatDate = (value?: string | null) => {
   if (!value) return "—"

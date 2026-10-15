@@ -7,7 +7,7 @@ import RubberSegment from "@/components/ui/rubber-segment"
 import { ThemeSwitcher } from "@/components/ui/theme-switcher"
 import { useNavigate } from "react-router-dom"
 
-const API_URL = "http://localhost:5001"
+const API_URL = import.meta.env.VITE_API_URL
 
 const Home = () => {
   const [mode, setMode] = useState<"Certificate" | "Verify">(

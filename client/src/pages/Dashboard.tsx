@@ -125,7 +125,7 @@ const [recentActivity, setRecentActivity] = useState<
       setLoadingEvents(true)
       setEventsError("")
 
-      const response = await fetch("http://localhost:5001/api/dashboard", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/dashboard`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

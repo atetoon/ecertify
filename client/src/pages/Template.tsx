@@ -4642,7 +4642,7 @@ export default function Template() {
 
         const response = await fetch(
 
-          `http://localhost:5001/api/events/${eventId}/template`,
+          `${import.meta.env.VITE_API_URL}/api/events/${eventId}/template`,
 
           { headers: { Authorization: `Bearer ${token}` } },
 
@@ -4802,7 +4802,7 @@ export default function Template() {
 
         const response = await fetch(
 
-          `http://localhost:5001/api/events/${eventId}/template`,
+          `${import.meta.env.VITE_API_URL}/api/events/${eventId}/template`,
 
           {
 
@@ -4953,7 +4953,7 @@ export default function Template() {
 
       const response = await fetch(
 
-        `http://localhost:5001/api/events/${eventId}/template/background`,
+        `${import.meta.env.VITE_API_URL}/api/events/${eventId}/template/background`,
 
         {
 
@@ -4996,7 +4996,7 @@ export default function Template() {
       }
 
 
-
+      
       const uploadedBackgroundUrl =
         data.backgroundUrl ??
         data.background?.url ??

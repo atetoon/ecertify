@@ -16,7 +16,7 @@ import type { LucideIcon } from "lucide-react"
 
 import OrganizerLayout from "@/components/organizer/organizer-layout"
 
-const API_URL = "http://localhost:5001"
+const API_URL = import.meta.env.VITE_API_URL
 
 type CertificateStatus = "ISSUED" | "VERIFIED" | "REVOKED" | "REMOVED"
 

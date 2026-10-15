@@ -15,7 +15,7 @@ import {
 import OrganizerLayout from "@/components/organizer/organizer-layout"
 import HoldButton from "@/components/ui/hold-button"
 
-const API_URL = "http://localhost:5001"
+const API_URL = import.meta.env.VITE_API_URL
 
 interface BackendEvent {
   id: string
