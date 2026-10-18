@@ -108,6 +108,7 @@ export default function OrganizerLayout({
 
     if (value === "settings") {
       navigate("/settings")
+      return
     }
   }
 
@@ -145,15 +146,18 @@ export default function OrganizerLayout({
         <div className="px-7 py-10">
           <div className="[--bm-theme-ink:#18181b] [--bm-theme-accent:#18181b] [--bm-theme-line:#d4d4d8] dark:[--bm-theme-ink:#f4f4f5] dark:[--bm-theme-accent:#ffffff] dark:[--bm-theme-line:#3f3f46]">
             <BranchedMenu
+              key={location.pathname}
               items={menuItems}
               defaultActive={
-                isTemplatePage
-                  ? "template"
-                  : isEventsWorkspace || isEventPage
-                    ? "events"
-                    : location.pathname === "/dashboard"
-                      ? "dashboard"
-                      : undefined
+                location.pathname.startsWith("/settings")
+                  ? "settings"
+                  : isTemplatePage
+                    ? "template"
+                    : isEventsWorkspace || isEventPage
+                      ? "events"
+                      : location.pathname === "/dashboard"
+                        ? "dashboard"
+                        : undefined
               }
               defaultOpen={-1}
               onSelect={handleNavigation}

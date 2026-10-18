@@ -8,6 +8,7 @@ import { requireAuth } from "./middleware/auth.js";
 import { prisma } from "./prisma.js";
 
 import eventsRouter from "./routes/events.js";
+import settingsRouter from "./routes/settings.js";
 import registrationRouter from "./routes/registration.js";
 import templateRouter from "./routes/template.js";
 import participantRouter from "./routes/participant.js";
@@ -149,6 +150,7 @@ app.post("/api/auth/login", async (req, res) => {
  * Organizer protected routes
  */
 app.use("/api/dashboard", requireAuth, dashboardRouter);
+app.use("/api/settings", requireAuth, settingsRouter);
 app.use("/api/events", requireAuth, eventsRouter);
 app.use("/api/events", requireAuth, participantRouter);
 app.use("/api/events", requireAuth, certificateRouter);

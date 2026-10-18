@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard"
 import Events from "./pages/Events"
 import EventOverview from "./pages/EventOverview"
 import Template from "./pages/Template"
+import SettingsPage from "./pages/Settings";
 import Event from "./pages/Event"
 import Participants from "./pages/Participants"
 import Registration from "./pages/Registration"
@@ -32,6 +33,8 @@ function App() {
           <Route path="/events" element={<Events />} />
 
           <Route path="/event/new" element={<Event />} />
+
+          <Route path="/settings" element={<SettingsPage />} />
 
           <Route
             path="/events/:eventId"

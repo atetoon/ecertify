@@ -259,49 +259,24 @@ const [recentActivity, setRecentActivity] = useState<
 
 
   const handleNavigation = (value: string) => {
-
-    switch (value) {
-
-      case "dashboard":
-
-        navigate("/dashboard")
-
-        break
-
-
-
-      case "events":
-
-        navigate("/events")
-
-        break
-
-
-
-      case "template":
-
-        console.log("Template")
-
-        break
-
-
-
-      case "settings":
-
-        console.log("Settings")
-
-        break
-
+    const routes: Record<string, string> = {
+      dashboard: "/dashboard",
+      events: "/events",
+      template: "/template",
+      settings: "/settings",
     }
 
+    const path = routes[value]
 
+    if (!path) return
 
-    // Useful on mobile. Harmless on desktop.
+    navigate(path)
 
-    setSidebarOpen(false)
-
+    // Close only on mobile.
+    if (window.innerWidth < 1024) {
+      setSidebarOpen(false)
+    }
   }
-
 
 
   return (
