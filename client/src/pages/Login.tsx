@@ -57,7 +57,7 @@ const Login = () => {
       <div className="grid min-h-screen lg:grid-cols-2">
 
         {/* Left Panel */}
-        <section className="relative hidden min-h-screen overflow-hidden p-5 lg:flex">
+        <section className="relative hidden min-h-screen overflow-hidden bg-[#090909] p-5 lg:flex">
 
           <div className="absolute inset-5 rounded-2xl bg-gradient-to-b from-zinc-800 via-zinc-500 to-zinc-100" />
 
