@@ -175,28 +175,35 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Floating Navigation Bar */}
-      <header className="absolute left-1/2 top-4 z-40 w-[calc(100%-2rem)] max-w-5xl -translate-x-1/2">
-        <nav className="flex h-14 items-center justify-between rounded-full border border-zinc-200/80 bg-white/80 px-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/70 sm:px-7">
-          {/* Brand */}
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-            className="shrink-0 font-['Quicksand'] text-lg font-bold tracking-tight text-zinc-950 transition-opacity hover:opacity-70 dark:text-white"
-          >
-            eCERTIFY
-          </button>
+      
+    {/* Floating Navigation Bar */}
+    <header className="absolute left-1/2 top-5 z-40 w-[calc(100%-2rem)] max-w-5xl -translate-x-1/2">
+      <nav className="flex h-16 items-center justify-between rounded-full border border-zinc-200/80 bg-white/90 px-5 shadow-lg shadow-black/[0.03] backdrop-blur-2xl transition-colors dark:border-white/10 dark:bg-[#080808]/90 sm:px-8">
 
-          {/* Organizer Login */}
-          <button
-            type="button"
-            onClick={() => navigate("/login")}
-            className="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-black px-3 text-[9px] font-extrabold tracking-wide text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 sm:gap-2 sm:px-5 sm:text-[10px]"          >
-            ORGANIZER LOGIN
-            <span className="text-xs">→</span>
-          </button>
-        </nav>
-      </header>
+        {/* Brand */}
+        <button
+          type="button"
+          onClick={() => navigate("/")}
+          className="shrink-0 font-['Quicksand'] text-xl font-bold tracking-tight text-zinc-950 transition-opacity hover:opacity-60 dark:text-white"
+        >
+          eCERTIFY
+        </button>
+
+        {/* Organizer Login */}
+        <button
+          type="button"
+          onClick={() => navigate("/login")}
+          className="group inline-flex h-10 items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 text-[10px] font-semibold tracking-[0.12em] text-white transition-all duration-200 hover:bg-zinc-700 active:scale-[0.98] dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 sm:px-6"
+        >
+          ORGANIZER LOGIN
+          <span className="text-sm transition-transform duration-200 group-hover:translate-x-0.5">
+            →
+          </span>
+        </button>
+
+      </nav>
+    </header>
+
 
       {/* Theme Switcher — original position and behavior preserved */}
       <div className="absolute right-6 top-6 z-50">
