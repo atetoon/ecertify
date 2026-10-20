@@ -193,7 +193,7 @@ const Home = () => {
         <button
           type="button"
           onClick={() => navigate("/login")}
-          className="group inline-flex h-10 items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 text-[10px] font-semibold tracking-[0.12em] text-white transition-all duration-200 hover:bg-zinc-700 active:scale-[0.98] dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 sm:px-6"
+          className="group inline-flex h-10 items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 text-[10px] font-bold tracking-[0.12em] text-white transition-all duration-200 hover:bg-zinc-700 active:scale-[0.98] dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 sm:px-6"
         >
           ORGANIZER LOGIN
           <span className="text-sm transition-transform duration-200 group-hover:translate-x-0.5">
