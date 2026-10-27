@@ -43,78 +43,105 @@ const Home = () => {
     setErrorMessage("")
   }
 
+  
   const handleGetCertificate = async () => {
     const code = certificateCode.trim().toUpperCase()
 
-    if (code.length < 8) {
-      showError("Please enter your 8-character access code.")
+    if (!/^[A-Z0-9]{8}$/.test(code)) {
+      showError(
+        code.length < 8
+          ? "Please enter your 8-character access code."
+          : "Access code can only contain letters and numbers."
+      )
       return
     }
 
-    if (!/^[A-Z0-9]{8}$/.test(code)) {
-      showError("Access code can only contain letters and numbers.")
+    // Open the tab synchronously during the click to avoid popup blocking.
+    const certificateTab = window.open("about:blank", "_blank")
+
+    if (!certificateTab) {
+      showError("Please allow pop-ups for ecertify.tech and try again.")
       return
     }
+
+    certificateTab.document.title = "Loading certificate..."
+    certificateTab.document.body.innerHTML =
+      '<p style="font-family: sans-serif; padding: 24px;">Loading your certificate...</p>'
 
     setLoading(true)
     clearError()
 
     try {
       const response = await fetch(
-        `${API_URL}/api/certificates/access/${code}`,
+        `${API_URL}/api/certificates/access/${code}`
       )
 
       const data = await response.json()
 
       if (!response.ok || !data.success) {
-        if (data.code === "NOT_ISSUED") {
-          showError("Your certificate has not been issued yet.")
-        } else if (data.code === "REVOKED") {
-          showError("This certificate has been revoked.")
-        } else if (data.code === "REMOVED") {
-          showError("This certificate is no longer available.")
-        } else {
-          showError(data.message || "Invalid access code.")
-        }
-
-        return
+        throw new Error(
+          data.code === "NOT_ISSUED"
+            ? "Your certificate has not been issued yet."
+            : data.code === "REVOKED"
+              ? "This certificate has been revoked."
+              : data.code === "REMOVED"
+                ? "This certificate is no longer available."
+                : data.message || "Invalid access code."
+        )
       }
 
-      setStatus("success")
-
-      // Fetch the actual certificate PDF.
       const pdfResponse = await fetch(
-        `${API_URL}/api/certificates/access/${code}/pdf`,
+        `${API_URL}/api/certificates/access/${code}/pdf`
       )
 
       if (!pdfResponse.ok) {
         const pdfData = await pdfResponse.json().catch(() => null)
-
         throw new Error(
-          pdfData?.message || "Unable to load your certificate.",
+          pdfData?.message || "Unable to load your certificate."
         )
       }
 
       const blob = await pdfResponse.blob()
-      const pdfUrl = URL.createObjectURL(blob)
 
-      window.open(pdfUrl, "_blank", "noopener,noreferrer")
+      if (blob.size === 0) {
+        throw new Error("The certificate PDF is empty.")
+      }
 
-      setTimeout(() => {
+      const pdfUrl = URL.createObjectURL(
+        new Blob([blob], { type: "application/pdf" })
+      )
+
+      certificateTab.location.href = pdfUrl
+
+      // Show the success checkmark briefly.
+      setStatus("success")
+      setErrorMessage("")
+
+      window.setTimeout(() => {
+        setCertificateCode("")
+        setStatus("idle")
+      }, 1200)
+
+      // Keep the PDF URL alive while the new tab loads the certificate.
+      window.setTimeout(() => {
         URL.revokeObjectURL(pdfUrl)
-      }, 60_000)
-    } catch (error) {
+      }, 5 * 60 * 1000)
+      } catch (error) {
+
       console.error("Get certificate error:", error)
+
+      certificateTab.close()
 
       showError(
         error instanceof Error
           ? error.message
-          : "Unable to retrieve certificate.",
+          : "Unable to retrieve certificate."
       )
     } finally {
       setLoading(false)
     }
   }
+
 
   const handleVerifyCertificate = () => {
     const code = certificateCode.trim().toUpperCase()

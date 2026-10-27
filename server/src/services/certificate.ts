@@ -350,16 +350,6 @@ function renderFields(
 
 ): string {
 
-  console.log(
-    "PDF FIELD SIZES:",
-    fields.map((field) => ({
-      type: field.type,
-      content: field.content,
-      fontSize: field.fontSize,
-      fontFamily: field.fontFamily,
-    })),
-  );
-
   return fields
 
     .map((field) => {
