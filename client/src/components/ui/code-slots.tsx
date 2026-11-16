@@ -113,6 +113,20 @@ const CodeSlots: React.FC<CodeSlotsProps> = ({
   const reduce = useReducedMotion();
   const inputRef = useRef<HTMLInputElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
+  const [availableWidth, setAvailableWidth] = useState(0);
+
+  useEffect(() => {
+    const row = rowRef.current;
+    const container = row?.parentElement;
+    if (!container) return;
+
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) setAvailableWidth(entry.contentRect.width);
+    });
+    observer.observe(container);
+    setAvailableWidth(container.getBoundingClientRect().width);
+    return () => observer.disconnect();
+  }, []);
   const [slots, setSlots] = useState(() => toSlots(value ?? defaultValue, length));
   const [active, setActive] = useState(() => firstEmptyOf(slots));
   const [focused, setFocused] = useState(false);
@@ -138,9 +152,16 @@ const CodeSlots: React.FC<CodeSlotsProps> = ({
     [length]
   );
   const { mvs, drops } = springs;
-  const pitch = slotSize + gap;
-  const height = Math.round(slotSize * 1.18);
-  const washRadius = Math.min(radius, slotSize / 2);
+  // Preserve the configured desktop size, but shrink slots to fit narrow screens.
+  const responsiveGap = availableWidth > 0 && availableWidth < length * slotSize + (length - 1) * gap
+    ? Math.min(gap, Math.max(3, availableWidth * 0.012))
+    : gap;
+  const responsiveSlotSize = availableWidth > 0
+    ? Math.min(slotSize, Math.max(24, (availableWidth - responsiveGap * (length - 1)) / length))
+    : slotSize;
+  const pitch = responsiveSlotSize + responsiveGap;
+  const height = Math.round(responsiveSlotSize * 1.18);
+  const washRadius = Math.min(radius, responsiveSlotSize / 2);
 
   const drive = useCallback(
     (i: number, to: number, delayMs = 0) => {
@@ -409,7 +430,7 @@ const busy =
 
   return (
     <div
-      className={`relative inline-block${className ? ` ${className}` : ''}`}
+      className={`relative flex w-full max-w-full justify-center${className ? ` ${className}` : ''}`}
       style={
         {
           '--cs-accent': accentColor,
@@ -417,11 +438,11 @@ const busy =
           '--cs-slot': slotColor,
           '--cs-digit': digitColor,
           '--cs-danger': dangerColor,
-          '--cs-size': `${slotSize}px`,
+          '--cs-size': `${responsiveSlotSize}px`,
           '--cs-height': `${height}px`,
-          '--cs-gap': `${gap}px`,
-          '--cs-radius': `${Math.min(radius, slotSize / 2)}px`,
-          '--cs-font': `${Math.round(slotSize * 0.5)}px`
+          '--cs-gap': `${responsiveGap}px`,
+          '--cs-radius': `${Math.min(radius, responsiveSlotSize / 2)}px`,
+          '--cs-font': `${Math.round(responsiveSlotSize * 0.5)}px`
         } as CSSProperties
       }
     >
@@ -474,7 +495,7 @@ const busy =
             className="grid place-items-center motion-reduce:transform-none! motion-reduce:[transition:opacity_150ms_ease]"
             style={{ transform: checkTransform, opacity: checkOpacity }}
           >
-            <HugeiconsIcon icon={Tick02Icon} size={Math.round(slotSize * 0.6)} strokeWidth={2.2} />
+            <HugeiconsIcon icon={Tick02Icon} size={Math.round(responsiveSlotSize * 0.6)} strokeWidth={2.2} />
           </motion.span>
         </motion.span>
         <motion.span

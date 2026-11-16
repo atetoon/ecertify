@@ -205,43 +205,39 @@ const Home = () => {
       
     {/* Floating Navigation Bar */}
     <header className="absolute left-1/2 top-5 z-40 w-[calc(100%-2rem)] max-w-5xl -translate-x-1/2">
-      <nav className="flex h-16 items-center justify-between rounded-full border border-zinc-200/80 bg-white/90 px-5 shadow-lg shadow-black/[0.03] backdrop-blur-2xl transition-colors dark:border-white/10 dark:bg-[#080808]/90 sm:px-8">
+      <nav className="flex h-14 sm:h-16 items-center justify-between gap-2 rounded-full border border-zinc-200/80 bg-white/90 px-3 sm:px-8 shadow-lg shadow-black/[0.03] backdrop-blur-2xl transition-colors dark:border-white/10 dark:bg-[#080808]/90 sm:gap-4">
 
         {/* Brand */}
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="shrink-0 font-['Quicksand'] text-xl font-bold tracking-tight text-zinc-950 transition-opacity hover:opacity-60 dark:text-white"
+          className="min-w-0 shrink font-['Quicksand'] text-base sm:text-xl font-bold tracking-tight text-zinc-950 transition-opacity hover:opacity-60 dark:text-white"
         >
           eCERTIFY
         </button>
 
-        {/* Organizer Login */}
-        <button
-          type="button"
-          onClick={() => navigate("/login")}
-          className="group inline-flex h-10 items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 text-[10px] font-bold tracking-[0.12em] text-white transition-all duration-200 hover:bg-zinc-700 active:scale-[0.98] dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 sm:px-6"
-        >
-          ORGANIZER LOGIN
-          <span className="text-sm transition-transform duration-200 group-hover:translate-x-0.5">
-            →
-          </span>
-        </button>
+        {/* Theme + Organizer Login */}
+        <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+          <ThemeSwitcher />
+          <button
+            type="button"
+            onClick={() => navigate("/login")}
+            className="group inline-flex h-9 sm:h-10 items-center justify-center gap-1.5 rounded-full bg-zinc-950 px-3 sm:px-6 text-[9px] sm:text-[10px] font-bold tracking-[0.08em] sm:tracking-[0.12em] text-white transition-all duration-200 hover:bg-zinc-700 active:scale-[0.98] dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+          >
+            <span className="whitespace-nowrap">ORGANIZER LOGIN</span>
+            <span className="text-sm transition-transform duration-200 group-hover:translate-x-0.5">→</span>
+          </button>
+        </div>
 
       </nav>
     </header>
 
 
-      {/* Theme Switcher — original position and behavior preserved */}
-      <div className="absolute right-6 top-6 z-50">
-        <ThemeSwitcher />
-      </div>
-
       {/* Main Content */}
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-6 pb-10 pt-24">
-        <div className="w-full max-w-md text-center">
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-4 pb-8 pt-24 sm:px-6 sm:pb-10 sm:pt-24">
+        <div className="w-full max-w-md min-w-0 text-center">
           {/* Heading */}
-          <h1 className="font-['Quicksand'] text-4xl font-bold tracking-tight sm:text-5xl">
+          <h1 className="font-['Quicksand'] text-3xl font-bold tracking-tight sm:text-5xl">
             eCERTIFY
           </h1>
 
@@ -250,7 +246,7 @@ const Home = () => {
           </p>
 
           {/* Mode Switch */}
-          <div className="mt-10 flex justify-center">
+          <div className="mt-7 flex justify-center sm:mt-10">
             <RubberSegment
               items={["Certificate", "Verify"]}
               value={mode}
@@ -279,7 +275,7 @@ const Home = () => {
 
           {/* Certificate Access Code */}
           {mode === "Certificate" ? (
-            <div className="mt-10 flex justify-center">
+            <div className="mt-7 flex w-full justify-center sm:mt-10">
               <CodeSlots
                 length={8}
                 value={certificateCode}
@@ -314,7 +310,7 @@ const Home = () => {
             </div>
           ) : (
             /* Certificate ID */
-            <div className="mt-10">
+            <div className="mt-7 sm:mt-10">
               <Input
                 value={certificateCode}
                 onChange={(e) => {
@@ -351,7 +347,7 @@ const Home = () => {
 
           {/* Action Button */}
           <Button
-            className="mt-3 w-full"
+            className="mt-3 h-11 w-full text-sm sm:h-12 sm:text-base"
             onClick={handleAction}
             disabled={loading}
           >
